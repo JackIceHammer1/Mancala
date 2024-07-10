@@ -57,6 +57,10 @@ class MancalaGame:
         if (self.current_player == 1 and pos == 6) or (self.current_player == 2 and pos == 13):
             self.update_board()
             return
+        if self.current_player == 1 and 0 <= pos < 6 and self.board[pos] == 1 or self.current_player == 2 and 7 <= pos < 13 and self.board[pos] == 1:
+            opposite_pos = 12 - pos
+            self.board[6 if self.current_player == 1 else 13] += self.board[opposite_pos] + 1
+            self.board[pos] = self.board[opposite_pos] = 0
         self.current_player = 2 if self.current_player == 1 else 1
         self.update_board()
 
