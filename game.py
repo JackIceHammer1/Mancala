@@ -6,6 +6,15 @@ class MancalaGame:
         self.root = root
         self.root.title("Mancala Game")
         self.root.geometry("1000x400")
+        self.show_instructions()
+
+    def show_instructions(self):
+        self.instruction_label = tk.Label(self.root, text="Instructions:\nClick on a pit to move stones. The player who has the most stones in their store wins.", font=("Arial", 18), bg="saddlebrown", fg="white")
+        self.instruction_label.pack(expand=True)
+        self.root.after(3000, self.start_game)
+
+    def start_game(self):
+        self.instruction_label.pack_forget()
         self.board = [4] * 14
         self.board[6] = 0
         self.board[13] = 0
