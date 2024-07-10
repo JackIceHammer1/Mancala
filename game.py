@@ -8,6 +8,7 @@ class MancalaGame:
         self.board = [4] * 14
         self.board[6] = 0
         self.board[13] = 0
+        self.current_player = 1
         self.create_board()
         self.update_board()
 
@@ -42,13 +43,21 @@ class MancalaGame:
             self.canvas.create_text(cx, cy, text=str(self.board[i]), font=("Arial", 18, "bold"), tags="text")
 
     def make_move(self, index):
+        if (self.current_player == 1 and index > 5) or (self.current_player == 2 and index < 7):
+            return
         stones = self.board[index]
         self.board[index] = 0
         pos = index
         while stones > 0:
             pos = (pos + 1) % 14
+            if (self.current_player == 1 and pos == 13) or (self.current_player == 2 and pos == 6):
+                continue
             self.board[pos] += 1
             stones -= 1
+        if (self.current_player == 1 and pos == 6) or (self.current_player == 2 and pos == 13):
+            self.update_board()
+            return
+        self.current_player = 2 if self.current_player == 1 else 1
         self.update_board()
 
 if __name__ == "__main__":
