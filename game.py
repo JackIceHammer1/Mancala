@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 
 class MancalaGame:
     def __init__(self, root):
@@ -63,6 +64,20 @@ class MancalaGame:
             self.board[pos] = self.board[opposite_pos] = 0
         self.current_player = 2 if self.current_player == 1 else 1
         self.update_board()
+        if self.check_game_over():
+            self.end_game()
+
+    def check_game_over(self):
+        return all(stone == 0 for stone in self.board[:6]) or all(stone == 0 for stone in self.board[7:13])
+
+    def end_game(self):
+        for i in range(6):
+            self.board[6] += self.board[i]
+            self.board[13] += self.board[i + 7]
+            self.board[i] = self.board[i + 7] = 0
+        self.update_board()
+        winner = "Player 1" if self.board[6] > self.board[13] else "Player 2" if self.board[13] > self.board[6] else "No one"
+        messagebox.showinfo("Game Over", f"Game Over! {winner} wins!")
 
 if __name__ == "__main__":
     root = tk.Tk()
