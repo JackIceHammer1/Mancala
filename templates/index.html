@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mancala Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #8b4513;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #game-board {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .pit-row {
+            display: flex;
+            flex-direction: row;
+        }
+        .pit {
+            width: 75px;
+            height: 75px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px;
+            color: black;
+            font-weight: bold;
+        }
+        #player1-store, #player2-store {
+            width: 75px;
+            height: 175px;
+            background-color: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px;
+            color: black;
+            font-weight: bold;
+        }
+        #turn-indicator {
+            margin: 20px;
+            font-size: 18px;
+        }
+        #name-input-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #game-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="name-input-screen">
+        <h1>Mancala Game</h1>
+        <label for="player1_name">Enter Player 1's Name:</label>
+        <input type="text" id="player1_name" name="player1_name"><br>
+        <label for="player2_name">Enter Player 2's Name:</label>
+        <input type="text" id="player2_name" name="player2_name"><br>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="game-screen" style="display: none;">
+        <div id="turn-indicator"></div>
+        <div id="game-board">
+            <div id="player2-store" class="pit"></div>
+            <div>
+                <div class="pit-row" id="player2-row"></div>
+                <div class="pit-row" id="player1-row"></div>
+            </div>
+            <div id="player1-store" class="pit"></div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {};
+
+        function startGame() {
+            const player1Name = document.getElementById('player1_name').value || 'Player 1';
+            const player2Name = document.getElementById('player2_name').value || 'Player 2';
+
+            fetch('/start_game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `player1_name=${player1Name}&player2_name=${player2Name}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                gameState = data;
+                document.getElementById('name-input-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+                updateBoard();
+            });
+        }
+
+        function updateBoard() {
+            const player1Row = document.getElementById('player1-row');
+            const player2Row = document.getElementById('player2-row');
+            const player1Store = document.getElementById('player1-store');
+            const player2Store = document.getElementById('player2-store');
+
+            player1Row.innerHTML = '';
+            player2Row.innerHTML = '';
+            
+            for (let i = 0; i < 6; i++) {
+                const pit = document.createElement('div');
+                pit.className = 'pit';
+                pit.innerText = gameState.board[i];
+                pit.onclick = () => makeMove(i);
+                player1Row.appendChild(pit);
+            }
+
+            for (let i = 12; i >= 7; i--) {
+                const pit = document.createElement('div');
+                pit.className = 'pit';
+                pit.innerText = gameState.board[i];
+                pit.onclick = () => makeMove(i);
+                player2Row.appendChild(pit);
+            }
+
+            player1Store.innerText = gameState.board[6];
+            player2Store.innerText = gameState.board[13];
+
+            const turnIndicator = document.getElementById('turn-indicator');
+            if (gameState.current_player == 1) {
+                turnIndicator.innerText = `${gameState.player1_name}'s Turn`;
+            } else {
+                turnIndicator.innerText = `${gameState.player2_name}'s Turn`;
+            }
+
+            if (gameState.winner) {
+                alert(`Game Over! ${gameState.winner} wins!`);
+                document.getElementById('game-screen').style.display = 'none';
+                document.getElementById('name-input-screen').style.display = 'block';
+            }
+        }
+
+        function makeMove(index) {
+            fetch('/make_move', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ...gameState, index })
+            })
+            .then(response => response.json())
+            .then(data => {
+                gameState = data;
+                updateBoard();
+            });
+        }
+    </script>
+</body
+</html>
